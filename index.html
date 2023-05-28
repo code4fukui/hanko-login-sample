@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>何かのサービス - Hanko ログイン（サンプル）</title>
+</head><body>
+<script type="module" src="https://code4fukui.github.io/input-text/input-text.js"></script>
+
+<h1>何かのサービス</h1>
+<main>
+<button id="btn">Hankoでログイン</button>
+<div id=divmessage></div>
+</main>
+
+<hr>
+Lib: <a href=https://github.com/code4fukui/sec.js>sec.js</a>, <a href=https://github.com/code4fukui/Base32/>Base32</a>, <a href=https://github.com/code4fukui/input-text/>input-text</a>, <a href=https://github.com/code4fukui/qr-code/>qr-code</a><br>
+<a href=https://github.com/code4fukui/hanko/>src on GitHub</a><br>
+<qr-code></qr-code><br>
+
+<script type="module">
+import { QRCode } from "https://js.sabae.cc/QRCode.js";
+import { DateTime } from "https://js.sabae.cc/DateTime.js";
+import { parseSign } from "https://code4fukui.github.io/hanko/hanko.js";
+import { Base32 } from "https://code4fukui.github.io/Base32/Base32.js";
+import { getRandomValue } from "https://js.sabae.cc/getRandomValue.js";
+
+const contract = "私は「サンプルサービス」にログインします。";
+
+btn.onclick = () => {
+  if (btn.textContent.indexOf("ログイン") >= 0) {
+    const data = contract + new DateTime().toString();
+    const base = "http://localhost:52070/";
+    const returl = location.hash ? location.href.substring(0, location.href.indexOf("#")): location.href;
+    const url = base + "#" + encodeURIComponent(data) + "," + encodeURIComponent(returl);
+    window.open(url, "_blank");
+  } else {
+    localStorage.removeItem("sessionid");
+    divmessage.textContent = "";
+    btn.textContent = "Hankoでログイン";
+  }
+};
+
+const start = (sessionid) => {
+  const did = localStorage.getItem("servicedid");
+  divmessage.innerHTML = `ようこそ、公開鍵 ${did} の持ち主さん！<br>セッションIDは ${sessionid} です。`;
+  btn.textContent = "ログアウト（セッション削除）";
+};
+
+const login = () => {
+  const sessionid0 = localStorage.getItem("sessionid");
+  if (sessionid0) {
+    start(sessionid0);
+  } else {
+    const data = parseSign();
+    if (!data) {
+      return;
+    }
+    if (!data.verified) {
+      divmessage.textContent = "電子署名が検証できませんでした。もう一度お試しください。";
+      return;
+    }
+    if (!data.text.startsWith(contract)) {
+      divmessage.textContent = "サービスへのログイン意思を確認できませんでした。もう一度お試しください。";
+      return;
+    }
+
+    const session = new Uint8Array(32);
+    getRandomValue(session);
+    const sessionid = Base32.encode(session);
+    localStorage.setItem("servicedid", data.did);
+    localStorage.setItem("sessionid", sessionid);
+    start(sessionid);
+  }
+};
+
+login();
+
+</script>
+
+<style>
+main > * {
+  margin: 1em 0;
+}
+</style>
+
+</body>
+</html>
