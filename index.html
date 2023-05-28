@@ -26,7 +26,8 @@ const contract = "私は「サンプルサービス」にログインします�
 btn.onclick = () => {
   if (btn.textContent.indexOf("ログイン") >= 0) {
     const data = contract + new DateTime().toString();
-    const base = "http://localhost:52070/";
+    //const base = "http://localhost:52070/";
+    const base = "https://code4fukui.github.io/hanko/";
     const returl = location.hash ? location.href.substring(0, location.href.indexOf("#")): location.href;
     const url = base + "#" + encodeURIComponent(data) + "," + encodeURIComponent(returl);
     window.open(url, "_blank");
@@ -39,7 +40,7 @@ btn.onclick = () => {
 
 const start = (sessionid) => {
   const did = localStorage.getItem("servicedid");
-  divmessage.innerHTML = `ようこそ、公開鍵 ${did} の持ち主さん！<br>セッションIDは ${sessionid} です。`;
+  divmessage.innerHTML = `ようこそ、公開鍵 ${did} の持ち主さん！`;
   btn.textContent = "ログアウト（セッション削除）";
 };
 
@@ -58,6 +59,10 @@ const login = () => {
     }
     if (!data.text.startsWith(contract)) {
       divmessage.textContent = "サービスへのログイン意思を確認できませんでした。もう一度お試しください。";
+      return;
+    }
+    if (new DateTime().getTime() - new DateTime(data.text.substring(contract.length)).getTime() > 1 * 60 * 1000) {
+      divmessage.textContent = "サービスへのログインは1分以内におねがいします。もう一度お試しください。";
       return;
     }
 
