@@ -1,5 +1,7 @@
 # hanko-login-sample
 
+> 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
+
 A sample web application that demonstrates login using the Hanko library.
 
 ## Features
