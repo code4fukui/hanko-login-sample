@@ -28,4 +28,4 @@ This project uses the following external libraries:
 - [Base32.js](https://code4fukui.github.io/Base32/Base32.js) - for encoding session IDs
 
 ## License
-This project is licensed under the MIT License.
+MIT License — see [LICENSE](LICENSE).
